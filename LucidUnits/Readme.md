@@ -82,11 +82,11 @@ To create a custom unit, derive from `UnitValue`:
   public UnitFootballField : UnitValue
   {
      // Defines the unit name and registers the unit with the system
-     public static new string Unit { get; } = UnitValue.Register<UnitFootballField(
+     public static new string Unit { get; } = UnitValue.Register<UnitFootballField>(
          "FootballField",              // The new unit's name
          UnitFoot.Unit,                // The base unit of conversion 
          fields => fields * 300,       // From the unit to the base unit conversion
-         feet => feet / 300             // Too the unit from the base unit conversion
+         feet => feet / 300            // Too the unit from the base unit conversion
      );
 
      public UnitFootballField(double value) : base (Unit, value) {}
