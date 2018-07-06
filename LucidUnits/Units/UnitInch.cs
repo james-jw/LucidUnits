@@ -1,7 +1,4 @@
-﻿using LucidUnits;
-using System.Collections.Generic;
-
-namespace LucidUnits
+﻿namespace LucidUnits
 {
     public class UnitInch : UnitValue
     {
@@ -15,9 +12,6 @@ namespace LucidUnits
             );
         }
 
-        public UnitInch(double value) : base(Unit)
-        {
-            Value = value;
-        }
+        public UnitInch(double value) : base(Unit, value) { }
    }
 }

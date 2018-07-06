@@ -6,9 +6,6 @@ namespace LucidUnits
     {
         public new static string Unit { get; } = "RADIAN";
 
-        public UnitRadian(double value) : base(UnitRadian.Unit)
-        {
-            Value = value; 
-        }
+        public UnitRadian(double value) : base(Unit, value) { }
     }
 }

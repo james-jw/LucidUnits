@@ -12,9 +12,6 @@
             );
         }
 
-        public UnitMetre(double value) : base(Unit)
-        {
-            Value = value;
-        }
+        public UnitMetre(double value) : base(Unit, value) {}
     }
 }

@@ -12,9 +12,6 @@
             );
         }
 
-        public UnitFoot(double value) : base(Unit)
-        {
-            Value = value;
-        }
+        public UnitFoot(double value) : base(Unit, value) { }
     }
 }

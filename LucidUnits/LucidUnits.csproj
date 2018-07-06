@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.1.8</Version>
+    <Authors>James Wright</Authors>
+    <PackageProjectUrl>https://github.com/james-jw/LucidUnits</PackageProjectUrl>
+    <PackageTags>units measures conversion</PackageTags>
+    <Description>Library for converting and working with common units.</Description>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

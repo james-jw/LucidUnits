@@ -13,9 +13,6 @@
             );
         }
 
-        public UnitFarenheit(double value) : base(Unit)
-        {
-            Value = value;
-        }
+        public UnitFarenheit(double value) : base(Unit, value) { }
     }
 }

@@ -14,9 +14,6 @@
             );
         }
 
-        public UnitMeter(double value) : base(UnitMeter.Unit)
-        {
-            Value = value;
-        }
+        public UnitMeter(double value) : base(Unit, value) { }
     }
 }

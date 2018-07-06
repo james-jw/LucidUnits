@@ -11,6 +11,15 @@ namespace LucidUnits
 
     /// <summary>
     /// Base class representing a unit value. 
+    ///
+    /// ### Custom Units
+    /// The `UnitValue` class is also used for creation of custom units. To create a custom unit simply derive from it. 
+    /// 
+    /// <code>
+    /// public class UnitFootballField : UnitValue { ...
+    /// </code>
+    ///
+    /// 
     /// </summary>
     public class UnitValue
     {
@@ -59,13 +68,10 @@ namespace LucidUnits
         /// <param name="baseUnit">The base unit this unit converts too.</param>
         /// <param name="conversionFrom">The conversion from the new unit to the base unit.</param>
         /// <param name="conversionTo">The conversion to the new unit from the base unit.</param>
-        /// <returns>The `unitName` provided.</returns>
-        public static string Register<T>(string unitName, string baseUnit, Func<double, double> conversionFrom, Func<double, double> conversionTo)
+        public static void Register<T>(string unitName, string baseUnit, Func<double, double> conversionFrom, Func<double, double> conversionTo)
         {
             AddConversion(unitName, baseUnit, conversionFrom);
             AddConversion(baseUnit, unitName, conversionTo);
-
-            return unitName;
         }
 
         public UnitValue(string unit)
@@ -79,8 +85,10 @@ namespace LucidUnits
             Value = value;
         }
 
+        [JsonProperty("unit")]
         public virtual string Unit { get; set; }
 
+        [JsonProperty("value")]
         public double Value { get; set; }
 
         /// <summary>
@@ -93,7 +101,6 @@ namespace LucidUnits
             if (Unit == unit)
                 return this;
 
-            var converterName = $"{Unit}_{unit}";
 
             UnitConversion conversion = FindConversion(Unit, unit);
             if(conversion != null)
@@ -101,7 +108,7 @@ namespace LucidUnits
                 return new UnitValue(unit, conversion.Convert(this.Value));
             }
 
-            throw new Exception($"Failed to convert value '{Value}' of unit '{Unit}' to '{unit}'. No converter, '{converterName}', exists");
+            throw new Exception($"Failed to convert value '{Value}' of unit '{Unit}' to '{unit}'. No converter, '{Unit}_{unit}', exists");
         }
 
         private UnitConversion FindConversion(string unitFrom, string unitTo, bool allowGeneration = true)
@@ -122,7 +129,7 @@ namespace LucidUnits
         {
             processed = processed ?? new HashSet<string>();
 
-            var conversions = AvailableConversionsTo(unitFrom);
+            var conversions = AvailableConversionsFrom(unitFrom);
             var validConversion = conversions.FirstOrDefault(c => c.Too == unitToo);
 
             if(validConversion == null)
@@ -148,7 +155,7 @@ namespace LucidUnits
             return validConversion;
         }
 
-        private IEnumerable<UnitConversion> AvailableConversionsTo(string unitFrom)
+        private IEnumerable<UnitConversion> AvailableConversionsFrom(string unitFrom)
         {
             foreach(var conversion in _converters.Values)
             {
@@ -193,7 +200,7 @@ namespace LucidUnits
             var same = a?.Unit == b?.Unit;
             if (!same)
             {
-                b = a?.Unit == null ? null : b?.ConvertTo(a.Unit);
+                b = a?.Unit == null ? b : b?.ConvertTo(a.Unit);
             }
 
             return b;
@@ -207,7 +214,7 @@ namespace LucidUnits
         public static bool operator== (UnitValue a, UnitValue b)
         {
             b = Coerce(a, b);
-            return a?.Value == null | b?.Value == null ? false : Nearly(a.Value, b.Value);
+            return a?.Value == null || b?.Value == null ? a?.Value == b?.Value : Nearly(a.Value, b.Value);
         }
 
         public static bool operator!= (UnitValue a, UnitValue b)
@@ -246,18 +253,40 @@ namespace LucidUnits
             return a.Value <= b.Value;
         }
 
+        /// <summary>
+        /// Comparison of values between units is supported:
+        /// 
+        /// <code>
+        /// Assert.IsTrue(new UnitFoot(1) == new UnitInch(12)) 
+        /// </code>
+        /// </summary>
         public static bool operator>= (UnitValue a, UnitValue b)
         {
             b = Coerce(a, b);
             return a.Value >= b.Value;
         }
 
+        /// <summary>
+        /// Multiple a unit value by a non unit value without issue:
+        ///
+        /// <code>
+        /// Assert.AreEqual(new UnitFoot(10), new UnitInch(12) * 10)
+        /// </code>
+        /// </summary>
         public static UnitValue operator* (UnitValue a, double b) {
             return new UnitValue(a.Unit)
             {
                 Value = a.Value * b
             };
         }
+
+        /// <summary>
+        /// Divide a unit value by a non unit value without issue:
+        ///
+        /// <code>
+        /// Assert.AreEqual(new UnitFoot(1), new UnitInch(24) / 2)
+        /// </code>
+        /// </summary>
         public static UnitValue operator/ (UnitValue a, double b) {
             return new UnitValue(a.Unit)
             {

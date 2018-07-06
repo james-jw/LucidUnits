@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LucidUnits
+﻿namespace LucidUnits
 {
     public class UnitKilometer : UnitValue
     {
@@ -16,9 +12,6 @@ namespace LucidUnits
             );
         }
 
-        public UnitKilometer(double value) : base(UnitKilometer.Unit)
-        {
-            Value = value;
-        }
+        public UnitKilometer(double value) : base(Unit, value) { }
     }
 }

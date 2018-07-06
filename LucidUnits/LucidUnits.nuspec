@@ -2,12 +2,12 @@
 <package >
   <metadata>
     <id>LucidUnits</id>
-    <version>0.1.5</version>
+    <version>0.1.7</version>
     <title>LucidUnits</title>
     <authors>James Wright</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Library for converting and working with common units.</description>
-    <releaseNotes>Initial Release</releaseNotes>
+    <releaseNotes>- Unit value type properties are now lower case (unit, value)</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>units measures</tags>
     <dependencies>

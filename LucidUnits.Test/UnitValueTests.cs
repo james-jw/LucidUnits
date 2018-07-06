@@ -35,6 +35,9 @@ namespace LucidUnits.Test
         [TestMethod]
         public void EqualityNullUnitTest()
         {
+            UnitValue item = null;
+            Assert.AreEqual(null, item);
+            Assert.IsTrue(null == item);
             Assert.IsFalse(new UnitValue(UnitMile.Unit, 1) == null);
             Assert.IsFalse(new UnitMile(1) == null);
             Assert.IsFalse(null == new UnitMile(1));

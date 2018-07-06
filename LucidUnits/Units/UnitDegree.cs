@@ -8,15 +8,12 @@ namespace LucidUnits
 
         static UnitDegree()
         {
-            UnitValue.Register<UnitDegree>("DEGREE", UnitRadian.Unit,
+            UnitValue.Register<UnitDegree>(Unit, UnitRadian.Unit,
                 (d) => d * (Math.PI / 180d),
                 (r) => r * (180d / Math.PI)
             );
         }
 
-        public UnitDegree(double value) : base(UnitDegree.Unit)
-        {
-            Value = value; 
-        }
+        public UnitDegree(double value) : base(Unit, value) { }
     }
 }

@@ -12,9 +12,6 @@
             );
         }
 
-        public UnitCelsius(double value) : base(UnitCelsius.Unit)
-        {
-            Value = value;
-        }
+        public UnitCelsius(double value) : base(Unit, value) { }
     }
 }

@@ -16,9 +16,6 @@ namespace LucidUnits.Units
             );
         } 
 
-        public UnitMillimeter(double value) : base(UnitMillimeter.Unit)
-        {
-            Value = value;
-        }
+        public UnitMillimeter(double value) : base(Unit, value) { }
     }
 }

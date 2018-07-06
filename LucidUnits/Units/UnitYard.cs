@@ -16,10 +16,7 @@ namespace LucidUnits
             );
         }
 
-        public UnitYard(double value) : base(UnitYard.Unit)
-        {
-            Value = value;
-        }
+        public UnitYard(double value) : base(UnitYard.Unit, value) { }
 
     }
 }

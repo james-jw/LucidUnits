@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LucidUnits
+﻿namespace LucidUnits
 {
     public class UnitMile : UnitValue
     {
@@ -16,9 +12,6 @@ namespace LucidUnits
             );
         }
 
-        public UnitMile(double value) : base(Unit)
-        {
-            Value = value;
-        }
+        public UnitMile(double value) : base(Unit, value) { }
     }
 }
