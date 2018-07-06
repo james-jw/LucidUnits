@@ -26,19 +26,35 @@ namespace LucidUnits.Test
         [TestMethod]
         public void GreaterThanTesting()
         {
+            Assert.IsTrue(new UnitValue("FOOT", 1) < new UnitValue("METRE", 20));
             Assert.IsTrue(new UnitMile(1) < new UnitYard(1761));
             Assert.IsTrue(new UnitFoot(24) > new UnitYard(7.666667d));
             Assert.IsTrue(new UnitRadian(Math.PI) < new UnitDegree(190));
         }
 
         [TestMethod]
+        public void EqualityNullUnitTest()
+        {
+            Assert.IsFalse(new UnitValue(UnitMile.Unit, 1) == null);
+            Assert.IsFalse(new UnitMile(1) == null);
+            Assert.IsFalse(null == new UnitMile(1));
+            Assert.AreNotEqual(new UnitValue(UnitMile.Unit, 1), null);
+            Assert.AreNotEqual(new UnitMile(1), null);
+            Assert.AreNotEqual(null, new UnitMile(1));
+        }
+
+        [TestMethod]
+
         public void EqualityUnitTest()
         {
+            Assert.IsTrue(new UnitValue(UnitMile.Unit, 1) == new UnitValue(UnitYard.Unit, 1760));
             Assert.IsTrue(new UnitMile(1) == new UnitYard(1760));
             Assert.IsTrue(new UnitMile(2) == new UnitYard(1760) + (new UnitMile(2) / 2));
-            Assert.IsTrue(new UnitMile(1) == new UnitInch(63360));
+            Assert.AreEqual(new UnitMile(1), new UnitInch(63360));
             Assert.IsTrue(new UnitBearing(90) == new UnitDegree(0));
-            Assert.AreEqual(new UnitFoot(23).Value, new UnitYard(7.6667d).ConvertTo(UnitFoot.Unit).Value);
+            Assert.IsTrue(new UnitFoot(23) == new UnitYard(7.6667d).ConvertTo(UnitFoot.Unit));
+            Assert.AreEqual(new UnitMetre(.3048d), new UnitFoot(1));
+            Assert.AreEqual(new UnitFoot(1), new UnitMetre(.3048d));
         }
 
         [TestMethod]
@@ -67,7 +83,7 @@ namespace LucidUnits.Test
                 nM = nM + jump;
             }
 
-            Assert.AreEqual(137, nM.Value);
+            Assert.AreEqual(137, Convert.ToInt32(nM.Value));
         }
     }
 }

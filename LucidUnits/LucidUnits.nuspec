@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>LucidUnits</id>
-    <version>0.1.0</version>
+    <version>0.1.5</version>
     <title>LucidUnits</title>
     <authors>James Wright</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -10,10 +10,13 @@
     <releaseNotes>Initial Release</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>units measures</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="9.0.1" />
+    </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\LucidUnits.dll" target="lib\netstandard2.0\LucidUnits.dll" />
-    <file src="bin\Release\LucidUnits.xml" target="lib\netstandard2.0\LucidUnits.xml" />
+    <file src="bin\Release\netstandard2.0\LucidUnits.dll" target="lib\netstandard2.0\LucidUnits.dll" />
+    <file src="bin\Release\netstandard2.0\LucidUnits.xml" target="lib\netstandard2.0\LucidUnits.xml" />
     <file src="Readme.md" target="" />
   </files>
 </package>

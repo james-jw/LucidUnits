@@ -3,18 +3,21 @@ using System.Collections.Generic;
 
 namespace LucidUnits
 {
-
     public class UnitInch : UnitValue
     {
-        public static new string Unit { get; } = UnitValue.Register<UnitInch>("INCH", UnitFoot.Unit,
-            f => f * 12,
-            i => i / 12
-        );
+        public static new string Unit { get => "INCH"; }
 
-        public UnitInch(double value) : base(UnitInch.Unit)
+        static UnitInch()
+        {
+            UnitValue.Register<UnitInch>(Unit, UnitFoot.Unit,
+                i => i / 12,
+                f => f * 12
+            );
+        }
+
+        public UnitInch(double value) : base(Unit)
         {
             Value = value;
         }
-
    }
 }

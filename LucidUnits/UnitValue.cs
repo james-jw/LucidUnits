@@ -1,13 +1,65 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace LucidUnits
 {
+
+    /// <summary>
+    /// Base class representing a unit value. 
+    /// </summary>
     public class UnitValue
     {
-        static Dictionary<string, UnitConversion> _converters;
+        static Dictionary<string, UnitConversion> _converters = new Dictionary<string, UnitConversion>();
 
+        static UnitValue()
+        {
+            foreach (var assembly in new Assembly[] { Assembly.GetExecutingAssembly(), Assembly.GetCallingAssembly() }.Distinct()) 
+            {
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.BaseType == typeof(UnitValue))
+                    {
+                        RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Registers a derived `UnitValue` type with the system. This should be called in the new unit types static constructor.
+        /// 
+        /// For example, to register a new type "DOZEN" with the system simply define the new unit class like so:
+        /// <code>
+        /// public class UnitDozen : UnitValue
+        /// {
+        ///    public static new Unit { get => "DOZEN" }
+        ///    
+        ///    static UnitDozen() 
+        ///    {
+        ///       UnitValue.Register&lt;UnitDozen&gt;(Unit, UnitValue.Any, 
+        ///          d => d * 12,
+        ///          n => n / 12
+        ///       );
+        ///    }
+        ///    
+        ///    public UnitDozen(double value) : base(Unit) 
+        ///    {
+        ///       Value = value;
+        ///    }
+        /// }
+        /// </code>
+        /// </summary>
+        /// <typeparam name="T">The unit type to register</typeparam>
+        /// <param name="unitName">The unit name</param>
+        /// <param name="baseUnit">The base unit this unit converts too.</param>
+        /// <param name="conversionFrom">The conversion from the new unit to the base unit.</param>
+        /// <param name="conversionTo">The conversion to the new unit from the base unit.</param>
+        /// <returns>The `unitName` provided.</returns>
         public static string Register<T>(string unitName, string baseUnit, Func<double, double> conversionFrom, Func<double, double> conversionTo)
         {
             AddConversion(unitName, baseUnit, conversionFrom);
@@ -16,24 +68,26 @@ namespace LucidUnits
             return unitName;
         }
 
-        protected static string Register<T>(string unitName)
-        {
-            return unitName;
-        }
-
         public UnitValue(string unit)
         {
             Unit = unit;
         }
 
+        [JsonConstructor]
         public UnitValue(string unit, double value) : this(unit)
         {
             Value = value;
         }
+
         public virtual string Unit { get; set; }
 
         public double Value { get; set; }
 
+        /// <summary>
+        /// Returns a new UnitValue equal to this UnitValue but in the unit provided.
+        /// </summary>
+        /// <param name="unit">The unit to convert to</param>
+        /// <returns>The converted value</returns>
         public UnitValue ConvertTo(string unit)
         {
             if (Unit == unit)
@@ -41,18 +95,18 @@ namespace LucidUnits
 
             var converterName = $"{Unit}_{unit}";
 
-            Func<double, double> conversion = FindConversion(Unit, unit);
+            UnitConversion conversion = FindConversion(Unit, unit);
             if(conversion != null)
             {
-                return new UnitValue(unit, conversion(this.Value));
+                return new UnitValue(unit, conversion.Convert(this.Value));
             }
 
             throw new Exception($"Failed to convert value '{Value}' of unit '{Unit}' to '{unit}'. No converter, '{converterName}', exists");
         }
 
-        private Func<double, double> FindConversion(string unitFrom, string unitTo)
+        private UnitConversion FindConversion(string unitFrom, string unitTo, bool allowGeneration = true)
         {
-            if(!_converters.TryGetValue($"{unitFrom}_{unitTo}", out UnitConversion conversion))
+            if(!_converters.TryGetValue($"{unitFrom}_{unitTo}", out UnitConversion conversion) && allowGeneration)
             {
                 UnitConversion dynamicConversion = GenerateDynamicConversion(unitFrom, unitTo);
                 if (dynamicConversion != null)
@@ -61,7 +115,7 @@ namespace LucidUnits
                 conversion = dynamicConversion;
             }
 
-            return conversion.Convert;
+            return conversion;
         }
 
         private UnitConversion GenerateDynamicConversion(string unitFrom, string unitToo, HashSet<string> processed = null) 
@@ -76,10 +130,16 @@ namespace LucidUnits
                 foreach(var conversion in conversions.Where(c => !processed.Contains(c.Id)))
                 {
                     processed.Add(conversion.Id);
-                    var dynamicConversion = GenerateDynamicConversion(conversion.Too, unitToo, processed);
+                    var dynamicConversion = FindConversion(conversion.Too, unitToo, false) ?? GenerateDynamicConversion(conversion.Too, unitToo, processed);
                     if (dynamicConversion != null)
                     {
-                        validConversion = new UnitConversion(unitFrom, unitToo, v => dynamicConversion.Convert(conversion.Convert(v)));
+                        validConversion = new UnitConversion(unitFrom, unitToo, v => {
+                            //Debug.WriteLine($"Executing conversion {conversion.Id} of value '{v}'");
+                            var vOut = conversion.Convert(v);
+                            //Debug.WriteLine($"Executing conversion {dynamicConversion.Id} of value '{vOut}'");
+                            return dynamicConversion.Convert(vOut);
+                        });
+
                         break;
                     }
                 }
@@ -102,7 +162,9 @@ namespace LucidUnits
             if(_converters == null)
                 _converters = new Dictionary<string, UnitConversion>();
 
-            _converters.Add($"{unitFrom}_{unitToo}", new UnitConversion(unitFrom, unitToo, conversion));
+            var id = $"{unitFrom}_{unitToo}";
+            if(!_converters.ContainsKey(id))
+                _converters.Add(id, new UnitConversion(unitFrom, unitToo, conversion));
         }
 
         private static UnitValue ProcessOperator(UnitValue a, UnitValue b, Func<UnitValue, UnitValue, double> operation)
@@ -128,9 +190,11 @@ namespace LucidUnits
 
         private static UnitValue Coerce(UnitValue a, UnitValue b)
         {
-            var same = a.Unit == b.Unit;
+            var same = a?.Unit == b?.Unit;
             if (!same)
-                b = b.ConvertTo(a.Unit);
+            {
+                b = a?.Unit == null ? null : b?.ConvertTo(a.Unit);
+            }
 
             return b;
         }
@@ -143,7 +207,7 @@ namespace LucidUnits
         public static bool operator== (UnitValue a, UnitValue b)
         {
             b = Coerce(a, b);
-            return Nearly(a.Value, b.Value);
+            return a?.Value == null | b?.Value == null ? false : Nearly(a.Value, b.Value);
         }
 
         public static bool operator!= (UnitValue a, UnitValue b)
@@ -158,7 +222,10 @@ namespace LucidUnits
 
         public override bool Equals(object obj)
         {
-            return obj is UnitValue uv && uv.Value == Value && uv.Unit == Unit;
+            if (obj is UnitValue otherValue)
+                return this == otherValue;
+
+            return false;
         }
 
         public static bool operator< (UnitValue a, UnitValue b)

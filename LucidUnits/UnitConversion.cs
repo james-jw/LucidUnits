@@ -4,12 +4,11 @@ namespace LucidUnits
 {
     public class UnitConversion
     {
-        public UnitConversion(string from, string too, Func<double, double> conversin)
+        public UnitConversion(string from, string too, Func<double, double> conversion)
         {
             From = from;
             Too = too;
-            Convert = Convert;
-            
+            Convert = conversion;
         }
 
         public string Id { get => $"{From}_{Too}"; }
